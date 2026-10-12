@@ -468,6 +468,9 @@ dialog { max-height: calc(100vh - 32px); overflow: auto; }
 .shop-icon { background: #dff3ff; border-color: #1e6b93; font-size: 12px; }
 .mer-icon { background: #fff1c7; border-color: #9a6a00; font-size: 12px; }
 .laby-icon { background: #e6defa; border-color: #5b3fa8; font-size: 16px; }
+.axe-icon { background: #e9f3dc; border-color: #4d6b2a; font-size: 12px; }
+.axe-icon.pro { background: #ffe9b8; border-color: #a86b00; }
+.axe-icon.guard { background: #d6f4ff; border-color: #1f7fa8; font-size: 11px; }
 .quest-icon { background: #fff4b8; border-color: #c48a00; font-size: 13px; }
 .quest-icon.done { background: #d9ead3; border-color: #4f8a3a; filter: grayscale(.4); }
 .giver-q.done h4 { text-decoration: line-through; opacity: .7; }
@@ -3476,7 +3479,7 @@ const state = {
   amOwn: loadSet('-amiibo', new Set(AMIIBO.map(a => a.id))),
   amStage: (() => { try { const v = Number(localStorage.getItem(STORE_KEY + '-amiibo-etapa')); return [0, 1, 2].includes(v) && localStorage.getItem(STORE_KEY + '-amiibo-etapa') !== null ? v : 2; } catch { return 2; } })(),
   amSerie: 'Todas', amQuery: '', amMine: false, amExclOnly: false,
-  layers: { s: true, t: true, m: true, k: false, e: true, p: true, h: true, c: false, v: false, l: true, n: true, q: false, b: false },
+  layers: { s: true, t: true, m: true, k: false, e: true, p: true, h: true, c: false, v: false, l: true, n: true, q: false, b: false, x: false },
   hideDone: false
 };
 let undoSnapshot = null;
@@ -4036,6 +4039,7 @@ function gearCard(g, isBest) {
     <p class="gear-loc">📍 ${where || 'Ubicación no disponible'}${g.amiibo ? ' <span class="fx-badge">amiibo</span>' : ''}</p>
     ${GEAR_REG[g.id] ? (() => { const r = GEAR_REG[g.id], tot = r.reduce((a, [, n]) => a + n, 0); return `<p class="fx-note">🗺️ Dónde aparece más (${tot} en el mapa, contando enemigos que lo llevan): ${r.filter(([, n]) => tot < 3 || n >= Math.max(2, tot * .05)).slice(0, 5).map(([x, n]) => `${x} (${n})`).join(' · ')}</p>`; })() : ''}
     ${g.note ? `<p class="gear-note">ℹ️ ${g.note}</p>` : ''}
+    ${/^(woodcutter_s_axe|double_axe|ancient_battle_axe)/.test(g.id) ? `<p><button class="link-btn inline" type="button" data-axemap="1">🗺️ Ver todas las hachas en el mapa de Hyrule</button></p>` : ''}
     ${craft}
     <div class="card-actions">
       <span class="stepper" aria-label="Cuántos llevas">
@@ -4435,12 +4439,12 @@ function renderShrinesView() {
     $('shrineMap').innerHTML = `${mapModeSwitch()}
       <div class="layer-row" role="group" aria-label="Capas del mapa">
         <span class="fx-note">Mostrar:</span>
-        ${[['s', '⛩️ Santuarios'], ['t', '🗼 Torres'], ['m', '🖼️ Recuerdos'], ['k', '🌱 Kologs'], ['e', '🐴 Ranchos'], ['p', '🏘️ Pueblos'], ['h', '🧚 Grandes hadas'], ['c', '🛒 Tiendas'], ['v', '🎒 Mercaderes'], ['l', '🌀 Laberintos'], ['n', '🦁 Centaleones'], ['q', '❗ Misiones'], ['b', '🎁 Cofres']].map(([k, l]) =>
+        ${[['s', '⛩️ Santuarios'], ['t', '🗼 Torres'], ['m', '🖼️ Recuerdos'], ['k', '🌱 Kologs'], ['e', '🐴 Ranchos'], ['p', '🏘️ Pueblos'], ['h', '🧚 Grandes hadas'], ['c', '🛒 Tiendas'], ['v', '🎒 Mercaderes'], ['l', '🌀 Laberintos'], ['n', '🦁 Centaleones'], ['q', '❗ Misiones'], ['b', '🎁 Cofres'], ['x', '🪓 Hachas']].map(([k, l]) =>
           `<label class="check"><input type="checkbox" data-layer="${k}" ${state.layers[k] ? 'checked' : ''}> ${l}</label>`).join('')}
         <span class="fx-note" id="korokCount"></span>
       </div>
       <div id="realShrineMap" class="real-map" role="application" aria-label="Mapa realista de Hyrule con santuarios, torres, recuerdos, kologs, ranchos, pueblos, grandes hadas, tiendas, mercaderes, laberintos y centaleones"></div>
-      <p class="fx-note"><span class="key key-tower"></span> Torre · <span class="key" style="background:var(--t-recuerdo);border-radius:50%"></span> Recuerdo (número de la ruta) · <span class="key" style="background:#9be15d;border-radius:50%"></span> Kolog (toca para marcarlo) · 🐴 Rancho · 🏘️ Pueblo o lugar · 🧚 Gran hada · 🛒 Tienda · 🎒 Mercader (Terry o Kilton) · 💎 Gemas (Kairo y Ramella) · 🧳 Mercader ambulante · 🌀 Laberinto · 🦁 Centaleón · ❗ Quien da misiones · <span class="key" style="background:#e0a63a"></span> Cofre (toca para marcarlo) · <span class="key" style="background:var(--t-santuario)"></span> Santuario · <span class="key" style="background:var(--ok)"></span> Completado · borde dorado = con misión · <span class="key" style="background:var(--t-dlc)"></span> DLC. Usa la rueda o los botones para hacer zoom.</p>`;
+      <p class="fx-note"><span class="key key-tower"></span> Torre · <span class="key" style="background:var(--t-recuerdo);border-radius:50%"></span> Recuerdo (número de la ruta) · <span class="key" style="background:#9be15d;border-radius:50%"></span> Kolog (toca para marcarlo) · 🐴 Rancho · 🏘️ Pueblo o lugar · 🧚 Gran hada · 🛒 Tienda · 🎒 Mercader (Terry o Kilton) · 💎 Gemas (Kairo y Ramella) · 🧳 Mercader ambulante · 🌀 Laberinto · 🦁 Centaleón · ❗ Quien da misiones · <span class="key" style="background:#e0a63a"></span> Cofre (toca para marcarlo) · 🪓 Hacha (verde = de leñador, naranja = de experto, azul = de guardián en un santuario) · <span class="key" style="background:var(--t-santuario)"></span> Santuario · <span class="key" style="background:var(--ok)"></span> Completado · borde dorado = con misión · <span class="key" style="background:var(--t-dlc)"></span> DLC. Usa la rueda o los botones para hacer zoom.</p>`;
     mountRealMap('realShrineMap', (L, map) => {
       const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
       // Kologs (muchos puntos: se dibujan en canvas)
@@ -4499,6 +4503,22 @@ function renderShrinesView() {
           .bindTooltip(pl.k === 'p' ? `${pl.n} · ${regionAtGame(pl.gx, pl.gz)} · toca para ver qué hay aquí` : pl.k === 'e' || pl.k === 'v' ? `${pl.n} · ${regionAtGame(pl.gx, pl.gz)}` : pl.k === 'q' ? `${pl.n}: ${pl.qs.map(id => QUEST_BY_ID[id].nombre).join(', ')}` : pl.k === 'c' ? `${pl.n} · ${pl.town}` : pl.k === 'n' ? `${pl.n} · ${regionAtGame(pl.gx, pl.gz)}${pl.gate ? ' · ' + pl.gate : pl.cerca ? ' · cerca de ' + pl.cerca : ''}${pl.hard ? ' (solo en Modo Experto)' : ''}` : pl.n)
           .on('click', () => { state.sSel = pl.id; renderShrinesView(); }).addTo(map);
       });
+      // Hachas
+      if (state.layers.x) {
+        AXES.forEach(([x, z, t, s], i) => {
+          if (state.sRegion && regionAtGame(x, z) !== state.sRegion) return;
+          const g = GEAR_BY_ID[AXE_TYPE[t]];
+          L.marker(toLatLng(x, z), { icon: L.divIcon({ className: 'st-icon axe-icon' + (t === 'e' ? ' pro' : ''), html: '🪓', iconSize: [22, 22] }), title: g.n, zIndexOffset: -200 })
+            .bindTooltip(`${g.n} · ${AXE_SRC[s][1].toLowerCase()} · ${regionAtGame(x, z)}`)
+            .on('click', () => openPopup(map, toLatLng(x, z), axeHtml(i))).addTo(map);
+        });
+        SHRINES.filter(s => AXE_SHRINE_LVL[s.trial] && (!state.sRegion || SHRINE_REGION[s.id] === state.sRegion)).forEach(s => {
+          const lv = AXE_SHRINE_LVL[s.trial], ll = fromSchem(s.x, s.y);
+          L.marker(ll, { icon: L.divIcon({ className: 'st-icon axe-icon guard', html: '🪓', iconSize: [20, 20], iconAnchor: [-2, 22] }), title: lv[0], zIndexOffset: 300 })
+            .bindTooltip(`${lv[0]} · miniguardián del santuario ${s.es}`)
+            .on('click', () => openPopup(map, ll, axeShrineHtml(s))).addTo(map);
+        });
+      }
       if (state.layers.t) towersVis.forEach(t => {
         const done = state.tdone.has(t.id);
         L.marker(fromSchem(t.x, t.y), { icon: L.divIcon({ className: 'tw-icon' + (done ? ' done' : '') + (state.sSel === t.id ? ' sel' : ''), html: '<span></span>', iconSize: [18, 18], iconAnchor: [9, 14] }), title: t.n })
@@ -4609,6 +4629,45 @@ const CHEST_TYPE = [
   ['Cofre de campamento', 'Está cerrado: se abre solo cuando derrotas a todos los enemigos del campamento.']];
 const chestCounts = c => c[5] !== 1 && c[5] !== 2;   // los del DLC y de Xenoblade no cuentan para completar
 const chestStats = reg => { let n = 0, d = 0; CHESTS.forEach((c, i) => { if (CHEST_REGIONS[c[2]] === reg && chestCounts(c)) { n++; if (state.cdone.has(i)) d++; } }); return [d, n]; };
+const AXES = [[-3273,-1742,"l","s"],[-3239,-1719,"l","s"],[-3966,1278,"l","ba"],[-2950,-3136,"l","s"],[-2280,-1902,"l","s"],[-2902,-563,"l","s"],[-1954,311,"l","s"],[-1408,1249,"l","s"],[-1020,2044,"l","s"],[-697,-1294,"l","s"],[-346,1582,"l","ba"],[-921,1872,"l","s"],[-778,2254,"l","s"],[904,165,"l","s"],[712,1892,"l","s"],[355,1073,"l","s"],[1039,1895,"l","s"],[1774,1928,"l","s"],[1896,1044,"l","s"],[1552,3533,"l","s"],[3160,-1719,"l","s"],[3199,-268,"l","s"],[3087,2157,"l","ba"],[3062,3396,"l","s"],[4239,-2755,"l","s"],[4601,-610,"l","s"],[4599,3561,"l","s"],[-3956,1272,"e","bn"],[-3741,996,"e","s"],[-3283,2595,"e","s"],[-1633,-2602,"e","s"],[433,-2030,"e","s"],[810,-19,"e","cm"],[866,3548,"e","cp"],[1070,-1160,"e","s"],[1375,3425,"e","cm"],[1699,3171,"e","cp"],[2599,-1158,"e","s"],[2029,1929,"e","cp"],[3932,-1593,"e","s"],[3071,3390,"e","s"]];   // [x, z, l=leñador/e=experto, origen] (objmap)
+const AXE_TYPE = { l: 'woodcutter_s_axe', e: 'double_axe' };
+const AXE_SRC = {
+  s: ['🪓', 'Tirada en el suelo', 'Está en el suelo o apoyada junto a un montón de leña o un tronco. Acércate y recógela con A.'],
+  br: ['👹', 'La lleva un Bokoblin rojo', 'Un Bokoblin rojo la usa como arma. Derrótalo (o hazlo soltarla con un golpe fuerte) y recógela del suelo.'],
+  ba: ['👹', 'La lleva un Bokoblin azul', 'Un Bokoblin azul la usa como arma. Es más resistente que el rojo: lleva un arma decente y comida que cure. Al derrotarlo, recoge el hacha.'],
+  bn: ['👹', 'La lleva un Bokoblin negro', 'Un Bokoblin negro (de los fuertes) la usa como arma. Llega con varios corazones y armas buenas; al derrotarlo, recoge el hacha.'],
+  cm: ['🎁', 'Dentro de un cofre de metal', 'El cofre puede estar a la vista, enterrado o bajo el agua: con la runa del imán (Magnesis) lo ves brillar y lo sacas.'],
+  cp: ['🎁', 'Dentro de un cofre de piedra', 'Suele estar escondido en ruinas, cuevas o bajo rocas: rompe o mueve lo que lo tapa.'],
+  cw: ['🎁', 'Dentro de un cofre de madera', 'Suele estar a la vista en campamentos o casas.'],
+};
+// Santuarios con miniguardianes que pueden llevar Hacha de guardián
+const AXE_SHRINE_LVL = { 'A Minor Test of Strength': ['Hacha de guardián', 'algunos santuarios de prueba de fuerza básica'], 'A Modest Test of Strength': ['Hacha de guardián II', 'algunos santuarios de prueba de fuerza intermedia'], 'A Major Test of Strength': ['Hacha de guardián III', 'todos los santuarios de gran prueba de fuerza'] };
+function axeNear(x, z) {
+  let best = null;
+  PLACES.forEach(pl => { if (pl.gx == null || !'epchvl'.includes(pl.k)) return; const d = Math.hypot(pl.gx - x, pl.gz - z); if (!best || d < best.d) best = { d, n: pl.n }; });
+  return best && best.d < 600 ? (best.d < 60 ? `junto a <b>${best.n}</b>` : `a unos ${Math.round(best.d / 10) * 10} m de <b>${best.n}</b>`) : '';
+}
+function axeHtml(i) {
+  const [x, z, t, s] = AXES[i], g = GEAR_BY_ID[AXE_TYPE[t]], src = AXE_SRC[s], near = axeNear(x, z);
+  const same = AXES.filter(a => a[2] === t).length;
+  return `<div class="sh-card pop-card">
+    <h3>🪓 ${g.n}</h3>
+    <p class="fx-note">🗺️ ${regionAtGame(x, z)}${near ? ' · ' + near : ''} · hay ${same} en el mapa</p>
+    ${sec(src[0], src[1], `<p>${src[2]}</p>`)}
+    ${sec('⚔️', '¿Qué tal es?', `<p>Ataque <b>${g.p}</b> · durabilidad <b>${g.d}</b> · arma a dos manos.</p><p>${t === 'l'
+      ? 'Es débil para pelear, pero muy útil: <b>tala árboles</b> de un par de golpes (para tirar frutas, bellotas o hacer un puente sobre un río) y saca leña para fogatas.'
+      : 'Más fuerte y resistente que la de leñador: sirve para pelear al principio del juego y también tala árboles.'}</p>`)}
+  </div>`;
+}
+function axeShrineHtml(s) {
+  const lv = AXE_SHRINE_LVL[s.trial];
+  return `<div class="sh-card pop-card">
+    <h3>🪓 ${lv[0]} · Santuario ${s.es}</h3>
+    <p class="fx-note">${s.tr} · ${SHRINE_REGION[s.id] || ''}</p>
+    ${sec('🤖', '¿Cómo se consigue?', `<p>Dentro del santuario te espera un <b>miniguardián</b> que pelea con armas de guardián. En ${lv[1]} lleva un <b>${lv[0]}</b>: derrótalo y suelta sus armas para que las recojas.</p><p>Consejo: bloquea o esquiva justo a tiempo y contraataca; sus brazos se rompen y deja caer el arma.</p>`)}
+    <div class="card-actions"><button class="btn small" type="button" data-shrinesel="${s.id}">⛩️ Ver la ficha del santuario</button></div>
+  </div>`;
+}
 function chestHtml(i) {
   const [x, z, r, ci, t, f] = CHESTS[i], on = state.cdone.has(i);
   const [d, n] = chestStats(CHEST_REGIONS[r]);
@@ -5484,6 +5543,12 @@ document.addEventListener('click', e => {
       setTimeout(() => { const m = REAL_MAPS.realShrineMap; if (m) m.setView(toLatLng(pl.gx, pl.gz), Math.max(m.getZoom(), 4)); }, 400);
       $('shrineMap').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  }
+  else if (d.axemap) {
+    state.sRegion = ''; state.layers.x = true; state.sSel = '';
+    if (mapMode !== 'real') setMapMode('real');
+    setView('santuarios');
+    $('shrineMap').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   else if (d.chestreg) {
     state.sRegion = d.chestreg; state.layers.b = true; state.sSel = '';
